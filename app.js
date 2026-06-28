@@ -4,6 +4,7 @@ const runOnceButton = document.getElementById("runOnce");
 const runManyButton = document.getElementById("runMany");
 const resetGraphButton = document.getElementById("resetGraph");
 const fairDieButton = document.getElementById("fairDieButton");
+const skewedDieButton = document.getElementById("skewedDieButton");
 const themeToggleButton = document.getElementById("themeToggle");
 const probabilityInputs = [
   document.getElementById("p1"),
@@ -122,8 +123,8 @@ function setProbabilityRawValue(input, value) {
 
 function formatProbabilityValue(value) {
   if (!Number.isFinite(value)) return "0";
-  const truncated = Math.trunc(value * 1000) / 1000;
-  return truncated.toFixed(3);
+  const truncated = Math.trunc(value * 100) / 100;
+  return truncated.toFixed(2);
 }
 
 function formatProbabilityInputs() {
@@ -265,6 +266,19 @@ function setFairDie() {
   probabilityInputs.forEach((input) => {
     setProbabilityRawValue(input, 100 / 6);
     input.value = formatProbabilityValue(100 / 6);
+  });
+  if (state.totals.length > 0) {
+    state.totals = [];
+  }
+  updateProbabilityNotice();
+  drawHistogram();
+}
+
+function setSkewedDie() {
+  const skewedProbabilities = [2, 3, 5, 10, 20, 60];
+  probabilityInputs.forEach((input, index) => {
+    setProbabilityRawValue(input, skewedProbabilities[index]);
+    input.value = formatProbabilityValue(skewedProbabilities[index]);
   });
   if (state.totals.length > 0) {
     state.totals = [];
@@ -528,6 +542,7 @@ runOnceButton.addEventListener("click", addOneTotal);
 runManyButton.addEventListener("click", addManyTotals);
 resetGraphButton.addEventListener("click", resetGraph);
 fairDieButton.addEventListener("click", setFairDie);
+skewedDieButton.addEventListener("click", setSkewedDie);
 themeToggleButton.addEventListener("click", toggleTheme);
 
 bagSizeInput.addEventListener("change", () => {
@@ -565,4 +580,3 @@ updateProbabilityNotice();
 setTheme(loadThemePreference() || "dark");
 formatProbabilityInputs();
 drawHistogram();
-
