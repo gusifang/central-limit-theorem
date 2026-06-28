@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Central Limit Theorem Dice Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-theme="dark">
+    <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false">
+      Normal mode
+    </button>
+    <main class="shell">
+      <section class="grid">
+        <article class="panel controls">
+          <div class="panel-section panel-section-top">
+            <h1>Central Limit Theorem Dice Lab</h1>
+            <h2>Bag and roll parameters</h2>
+            <p class="intro">
+              Imagine a bag full of dice. On each run, the bag is emptied onto a
+              table, all <strong>S</strong> dice are rolled, and their sum is
+              counted. Repeating that process <strong>N</strong> times adds
+              <strong>N</strong> totals to the histogram.
+            </p>
+
+            <div class="control-group">
+              <label for="bagSize">S, size of the bag</label>
+              <div class="inline-controls">
+                <input id="bagSize" type="number" min="1" max="1000" value="1" />
+                <button id="runOnce" class="primary">Run once</button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label for="runCount">N, number of runs</label>
+              <div class="inline-controls">
+                <input id="runCount" type="number" min="1" max="10000" value="10" />
+                <button id="runMany" class="secondary">Run N times</button>
+              </div>
+              <p class="hint">
+                Each run adds one bag total to the graph.
+              </p>
+            </div>
+          </div>
+
+          <div class="panel-section panel-section-bottom probabilities">
+            <h2>Dice parameters</h2>
+            <p class="hint">
+              The six probabilities must add up to 100%. This lets you test a
+              bag of fair dice or bag of skewed dice.
+            </p>
+            <div class="prob-grid">
+              <label><span class="prob-face">Face 1</span><span class="prob-input"><input id="p1" type="text" inputmode="decimal" value="16.6666667" /><span>%</span></span></label>
+              <label><span class="prob-face">Face 2</span><span class="prob-input"><input id="p2" type="text" inputmode="decimal" value="16.6666667" /><span>%</span></span></label>
+              <label><span class="prob-face">Face 3</span><span class="prob-input"><input id="p3" type="text" inputmode="decimal" value="16.6666667" /><span>%</span></span></label>
+              <label><span class="prob-face">Face 4</span><span class="prob-input"><input id="p4" type="text" inputmode="decimal" value="16.6666667" /><span>%</span></span></label>
+              <label><span class="prob-face">Face 5</span><span class="prob-input"><input id="p5" type="text" inputmode="decimal" value="16.6666667" /><span>%</span></span></label>
+              <label><span class="prob-face">Face 6</span><span class="prob-input"><input id="p6" type="text" inputmode="decimal" value="16.6666667" /><span>%</span></span></label>
+            </div>
+            <div class="prob-meta">
+              <p id="probabilityNotice" class="notice">Probability sum: 100%</p>
+              <button id="fairDieButton" class="ghost">Fair die</button>
+            </div>
+            <div id="diceStatsCaption" class="dice-stats">
+              <p>Mean of one die: μ = <span id="diceMeanValue">0</span></p>
+              <p>Standard deviation of one die: σ = <span id="diceStdDevValue">0</span></p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="chart-header">
+            <div>
+              <h2>Histogram of totals</h2>
+              <p class="hint">
+                X axis: possible totals from <strong>S</strong> dice. Y axis:
+                how many times each total was observed. The yellow curve shows
+                the exact expected distribution for S dice, and the red curve
+                shows the normal approximation.
+              </p>
+            </div>
+          </div>
+          <canvas id="histogram" width="1100" height="720"></canvas>
+          <div class="chart-footer">
+            <div class="axis-note">
+              <span>Low totals</span>
+              <span>High totals</span>
+            </div>
+            <div class="reset-row">
+              <button id="resetGraph" class="ghost">Reset graph</button>
+            </div>
+          </div>
+          <div class="stats-table-wrap">
+            <table id="distributionStats" class="stats-table">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col" class="stat-blue">Histogram</th>
+                  <th scope="col" class="stat-yellow">Exact distribution</th>
+                  <th scope="col" class="stat-red">Normal distribution</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Mean</th>
+                  <td id="histogramMeanValue">0</td>
+                  <td id="exactMeanValue">0</td>
+                  <td id="normalMeanValue">0</td>
+                </tr>
+                <tr>
+                  <th scope="row">Standard deviation</th>
+                  <td id="histogramStdValue">0</td>
+                  <td id="exactStdValue">0</td>
+                  <td id="normalStdValue">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p id="cltCaption" class="caption-text"></p>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
