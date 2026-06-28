@@ -166,6 +166,17 @@ input {
   font: inherit;
 }
 
+.spinnerless {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.spinnerless::-webkit-outer-spin-button,
+.spinnerless::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
 .prob-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

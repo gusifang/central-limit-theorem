@@ -248,8 +248,6 @@ function addOneTotal() {
 
 function addManyTotals() {
   if (!isProbabilitySumValid()) return;
-  setBagSize(bagSizeInput.value);
-  setRunCount(runCountInput.value);
 
   for (let i = 0; i < state.runCount; i += 1) {
     state.totals.push(runProcess());
@@ -297,8 +295,8 @@ function formatSd(value) {
 }
 
 function renderCltCaption() {
-  cltCaption.textContent =
-    "Central limit theorem: If the dice are independent and identically distributed (iid), then the standardized total of S dice converges to a standard normal distribution as S grows. Equivalently, for large S, the total of S dice is approximately normal with mean S × μ and standard deviation √S × σ, where μ is the mean of one die and σ is the standard deviation of one die.";
+  cltCaption.innerHTML =
+    "<strong>Sampling convergence (blue &rarr; yellow): repeating the experiment many times reveals the expected distribution of the sum.</strong> For a given number D of dice in the bag, the blue histogram approaches the yellow expected distribution as the number of rolls R increases.<br /><br /><strong>Central Limit Theorem (yellow &rarr; red): adding more independent dice makes the expected distribution increasingly bell-shaped.</strong> If the dice are independent and identically distributed (iid), then as the number of dice D increases, the distribution of the total becomes increasingly close to a normal distribution, with mean D &times; μ and standard deviation &radic;D &times; σ, where μ and σ are the mean and standard deviation of a single die.";
 }
 
 function drawAxes(width, height, padding) {
@@ -367,7 +365,7 @@ function drawHistogram() {
     ctx.fillText("No totals yet", padding, height / 2 - 8);
     ctx.fillStyle = palette.mutedText;
     ctx.font = '400 18px "Trebuchet MS", sans-serif';
-    ctx.fillText("Use Run once or Run N times to populate the histogram.", padding, height / 2 + 24);
+    ctx.fillText("Use Run once or Run R times to populate the histogram.", padding, height / 2 + 24);
     renderDiceSdCaption();
     renderCltCaption();
     return;
@@ -492,16 +490,16 @@ function drawHistogram() {
   ctx.save();
   ctx.fillStyle = palette.text;
   ctx.font = '600 18px "Trebuchet MS", sans-serif';
-  ctx.fillText(`S = ${s}, N = ${state.totals.length}`, padding, 30);
+  ctx.fillText(`D = ${s}, R = ${state.totals.length}`, padding, 30);
   ctx.fillStyle = palette.mutedText;
   ctx.font = '400 15px "Trebuchet MS", sans-serif';
-  ctx.fillText(`Each bar is a total from S dice, counted across N runs.`, padding, 52);
+  ctx.fillText(`Each bar is a total from D dice, counted across R runs.`, padding, 52);
   ctx.restore();
 
   ctx.save();
   const legend = [
     ["Histogram", palette.barTop],
-    ["Exact distribution", palette.exact],
+    ["Expected distribution", palette.exact],
     ["Normal approximation", palette.normal],
   ];
   ctx.font = '600 14px "Trebuchet MS", sans-serif';
@@ -534,7 +532,6 @@ themeToggleButton.addEventListener("click", toggleTheme);
 
 bagSizeInput.addEventListener("change", () => {
   setBagSize(bagSizeInput.value);
-  updateProbabilityNotice();
 });
 
 runCountInput.addEventListener("change", () => {
@@ -559,8 +556,8 @@ probabilityInputs.forEach((input) => {
   });
 });
 
-setBagSize(bagSizeInput.value);
-setRunCount(runCountInput.value);
+setBagSize(state.bagSize);
+setRunCount(state.runCount);
 probabilityInputs.forEach((input) => {
   setProbabilityRawValue(input, clampFloat(input.value, 0, 0));
 });

@@ -18,27 +18,27 @@
             <h2>Bag and roll parameters</h2>
             <p class="intro">
               Imagine a bag full of dice. On each run, the bag is emptied onto a
-              table, all <strong>S</strong> dice are rolled, and their sum is
-              counted. Repeating that process <strong>N</strong> times adds
-              <strong>N</strong> totals to the histogram.
+              table, all <strong>D</strong> dice are rolled, and their sum is
+              counted. Repeating that process <strong>R</strong> times adds
+              <strong>R</strong> totals to the histogram.
             </p>
 
             <div class="control-group">
-              <label for="bagSize">S, size of the bag</label>
+              <label for="bagSize">D, number of dice in the bag</label>
               <div class="inline-controls">
-                <input id="bagSize" type="number" min="1" max="1000" value="1" />
+                <input id="bagSize" class="spinnerless" type="number" min="1" max="1000" value="1" />
                 <button id="runOnce" class="primary">Run once</button>
               </div>
             </div>
 
             <div class="control-group">
-              <label for="runCount">N, number of runs</label>
+              <label for="runCount">R, number of runs</label>
               <div class="inline-controls">
-                <input id="runCount" type="number" min="1" max="10000" value="10" />
-                <button id="runMany" class="secondary">Run N times</button>
+                <input id="runCount" class="spinnerless" type="number" min="1" max="10000" value="10" />
+              <button id="runMany" class="secondary">Run R times</button>
               </div>
               <p class="hint">
-                Each run adds one bag total to the graph.
+                Each run adds one total from D dice to the graph.
               </p>
             </div>
           </div>
@@ -73,9 +73,9 @@
             <div>
               <h2>Histogram of totals</h2>
               <p class="hint">
-                X axis: possible totals from <strong>S</strong> dice. Y axis:
+                X axis: possible totals from <strong>D</strong> dice. Y axis:
                 how many times each total was observed. The yellow curve shows
-                the exact expected distribution for S dice, and the red curve
+                the expected distribution for D dice, and the red curve
                 shows the normal approximation.
               </p>
             </div>
@@ -96,7 +96,7 @@
                 <tr>
                   <th scope="col"></th>
                   <th scope="col" class="stat-blue">Histogram</th>
-                  <th scope="col" class="stat-yellow">Exact distribution</th>
+                  <th scope="col" class="stat-yellow">Expected distribution</th>
                   <th scope="col" class="stat-red">Normal distribution</th>
                 </tr>
               </thead>
