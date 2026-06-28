@@ -187,8 +187,8 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
+  gap: 6px;
+  padding: 14px 12px 12px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -205,20 +205,22 @@ input {
 .prob-face {
   display: block;
   width: 100%;
+  line-height: 1.15;
 }
 
 .prob-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: 100%;
+  gap: 4px;
+  width: auto;
 }
 
 .prob-input input {
-  width: 10ch;
-  min-width: 10ch;
-  flex: 1 1 10ch;
+  width: 8.5ch;
+  min-width: 8.5ch;
+  flex: 0 0 auto;
+  box-sizing: border-box;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -226,6 +228,7 @@ input {
 .prob-input span {
   color: var(--muted);
   white-space: nowrap;
+  margin-left: -1px;
 }
 
 .prob-meta {
@@ -239,6 +242,12 @@ input {
 
 .prob-meta .notice {
   margin: 0;
+}
+
+.preset-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .prob-meta button {
