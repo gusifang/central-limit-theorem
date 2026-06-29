@@ -393,7 +393,11 @@ function drawHistogram() {
   const normalMaxCount = faceStats && normalStdDev > 0
     ? normalPdf(mean, mean, normalStdDev) * curveCount
     : 0;
-  const scaleCount = Math.max(1, maxCount, exactMaxCount, normalMaxCount);
+  const overlayMaxCount = Math.max(exactMaxCount, normalMaxCount);
+  const emptyStateScaleCount = overlayMaxCount > 0 ? overlayMaxCount / 0.72 : 1;
+  const scaleCount = state.totals.length > 0
+    ? Math.max(1, maxCount, exactMaxCount, normalMaxCount)
+    : emptyStateScaleCount;
 
   if (state.totals.length > 0) {
     for (let i = 0; i < bins.length; i += 1) {
@@ -485,10 +489,10 @@ function drawHistogram() {
   }
 
   if (state.totals.length === 0) {
-    const captionX = padding + 12;
-    const captionY = height / 2 - 42;
     const captionWidth = 270;
     const captionHeight = 78;
+    const captionX = padding + (plotWidth - captionWidth) / 2;
+    const captionY = padding + (plotHeight - captionHeight) / 2;
     ctx.save();
     ctx.fillStyle = getTheme() === "light" ? "rgba(248,250,252,0.92)" : "rgba(8,16,29,0.8)";
     ctx.fillRect(captionX, captionY, captionWidth, captionHeight);
