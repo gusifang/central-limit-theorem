@@ -43,6 +43,7 @@ function setTheme(theme) {
   themeToggleButton.textContent = isLight ? "Dark mode" : "Normal mode";
   themeToggleButton.setAttribute("aria-pressed", String(isLight));
   saveThemePreference(theme);
+  drawHistogram();
 }
 
 function toggleTheme() {
@@ -345,6 +346,14 @@ function drawHistogram() {
   const probabilitiesValid = isProbabilitySumValid();
   const probabilities = probabilitiesValid ? getProbabilities() : null;
   const faceStats = probabilities ? computeMeanAndVariance(probabilities) : null;
+  const s = state.bagSize;
+  const minTotal = s;
+  const maxTotal = s * 6;
+  const binCount = maxTotal - minTotal + 1;
+  const plotWidth = width - padding * 2;
+  const plotHeight = height - padding * 2;
+  const barWidth = binCount > 0 ? plotWidth / binCount : plotWidth;
+  const curveCount = Math.max(1, state.totals.length);
 
   ctx.clearRect(0, 0, width, height);
 
@@ -355,40 +364,6 @@ function drawHistogram() {
   ctx.fillRect(0, 0, width, height);
 
   drawAxes(width, height, padding);
-
-  if (state.totals.length === 0) {
-    if (faceStats) {
-      const mean = state.bagSize * faceStats.mean;
-      const standardDeviation = Math.sqrt(state.bagSize * faceStats.variance);
-      histogramMeanValue.textContent = "-";
-      exactMeanValue.textContent = formatSd(mean);
-      normalMeanValue.textContent = formatSd(mean);
-      histogramStdValue.textContent = "-";
-      exactStdValue.textContent = formatSd(standardDeviation);
-      normalStdValue.textContent = formatSd(standardDeviation);
-    } else {
-      histogramMeanValue.textContent = "-";
-      exactMeanValue.textContent = "-";
-      normalMeanValue.textContent = "-";
-      histogramStdValue.textContent = "-";
-      exactStdValue.textContent = "-";
-      normalStdValue.textContent = "-";
-    }
-    ctx.fillStyle = palette.text;
-    ctx.font = '600 28px "Trebuchet MS", sans-serif';
-    ctx.fillText("No totals yet", padding, height / 2 - 8);
-    ctx.fillStyle = palette.mutedText;
-    ctx.font = '400 18px "Trebuchet MS", sans-serif';
-    ctx.fillText("Use Run once or Run R times to populate the histogram.", padding, height / 2 + 24);
-    renderDiceSdCaption();
-    renderCltCaption();
-    return;
-  }
-
-  const s = state.bagSize;
-  const minTotal = s;
-  const maxTotal = s * 6;
-  const binCount = maxTotal - minTotal + 1;
   const bins = Array.from({ length: binCount }, () => 0);
 
   for (const total of state.totals) {
@@ -397,37 +372,42 @@ function drawHistogram() {
     }
   }
 
-  const maxCount = Math.max(1, ...bins);
-  const plotWidth = width - padding * 2;
-  const plotHeight = height - padding * 2;
-  const barWidth = plotWidth / binCount;
-  const exactDistribution = getExactSumDistribution(probabilities, s);
-  const mean = s * faceStats.mean;
-  const histogramMean = state.totals.reduce((sum, total) => sum + total, 0) / state.totals.length;
-  const exactVariance = exactDistribution.reduce((sum, probability, index) => {
-    const total = minTotal + index;
-    return sum + probability * (total - mean) ** 2;
-  }, 0);
-  const exactStdDev = Math.sqrt(exactVariance);
-  const normalStdDev = Math.sqrt(s * faceStats.variance);
-  const histogramStdDev = computeStandardDeviation(state.totals);
-  const exactMaxCount = exactDistribution.reduce((max, probability) => Math.max(max, probability * state.totals.length), 0);
-  const normalMaxCount = normalStdDev > 0
-    ? normalPdf(mean, mean, normalStdDev) * state.totals.length
+  const exactDistribution = faceStats ? getExactSumDistribution(probabilities, s) : [];
+  const mean = faceStats ? s * faceStats.mean : 0;
+  const histogramMean = state.totals.length > 0
+    ? state.totals.reduce((sum, total) => sum + total, 0) / state.totals.length
     : 0;
-  const scaleCount = Math.max(maxCount, exactMaxCount, normalMaxCount);
+  const exactVariance = faceStats
+    ? exactDistribution.reduce((sum, probability, index) => {
+        const total = minTotal + index;
+        return sum + probability * (total - mean) ** 2;
+      }, 0)
+    : 0;
+  const exactStdDev = Math.sqrt(exactVariance);
+  const normalStdDev = faceStats ? Math.sqrt(s * faceStats.variance) : 0;
+  const histogramStdDev = state.totals.length > 0 ? computeStandardDeviation(state.totals) : 0;
+  const maxCount = state.totals.length > 0 ? Math.max(1, ...bins) : 0;
+  const exactMaxCount = faceStats
+    ? exactDistribution.reduce((max, probability) => Math.max(max, probability * curveCount), 0)
+    : 0;
+  const normalMaxCount = faceStats && normalStdDev > 0
+    ? normalPdf(mean, mean, normalStdDev) * curveCount
+    : 0;
+  const scaleCount = Math.max(1, maxCount, exactMaxCount, normalMaxCount);
 
-  for (let i = 0; i < bins.length; i += 1) {
-    const count = bins[i];
-    const barHeight = (count / scaleCount) * (plotHeight - 34);
-    const x = padding + i * barWidth + 1;
-    const y = height - padding - barHeight;
+  if (state.totals.length > 0) {
+    for (let i = 0; i < bins.length; i += 1) {
+      const count = bins[i];
+      const barHeight = (count / scaleCount) * (plotHeight - 34);
+      const x = padding + i * barWidth + 1;
+      const y = height - padding - barHeight;
 
-    const gradient = ctx.createLinearGradient(0, y, 0, height - padding);
-    gradient.addColorStop(0, palette.barTop);
-    gradient.addColorStop(1, palette.barBottom);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(x, y, Math.max(1, barWidth - 2), barHeight);
+      const gradient = ctx.createLinearGradient(0, y, 0, height - padding);
+      gradient.addColorStop(0, palette.barTop);
+      gradient.addColorStop(1, palette.barBottom);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, y, Math.max(1, barWidth - 2), barHeight);
+    }
   }
 
   ctx.save();
@@ -461,35 +441,38 @@ function drawHistogram() {
   }
   ctx.restore();
 
-  ctx.save();
-  ctx.strokeStyle = palette.exact;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  for (let i = 0; i < binCount; i += 1) {
-    const pmf = exactDistribution[i] || 0;
-    const yCount = pmf * state.totals.length;
-    const y = height - padding - (yCount / scaleCount) * (plotHeight - 34);
-    const xLeft = padding + i * barWidth;
-    const xRight = padding + (i + 1) * barWidth;
+  if (faceStats) {
+    ctx.save();
+    ctx.strokeStyle = palette.exact;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let i = 0; i < binCount; i += 1) {
+      const pmf = exactDistribution[i] || 0;
+      const yCount = pmf * curveCount;
+      const y = height - padding - (yCount / scaleCount) * (plotHeight - 34);
+      const xCenter = padding + (i + 0.5) * barWidth;
+      const xLeft = xCenter - barWidth / 2;
+      const xRight = xCenter + barWidth / 2;
 
-    if (i === 0) {
-      ctx.moveTo(xLeft, y);
-    } else {
-      ctx.lineTo(xLeft, y);
+      if (i === 0) {
+        ctx.moveTo(xLeft, y);
+      } else {
+        ctx.lineTo(xLeft, y);
+      }
+      ctx.lineTo(xRight, y);
     }
-    ctx.lineTo(xRight, y);
+    ctx.stroke();
+    ctx.restore();
   }
-  ctx.stroke();
-  ctx.restore();
 
-  if (normalStdDev > 0) {
+  if (faceStats && normalStdDev > 0) {
     ctx.save();
     ctx.strokeStyle = palette.normal;
     ctx.lineWidth = 3;
     ctx.beginPath();
     for (let total = minTotal; total <= maxTotal; total += 0.1) {
-      const yCount = normalPdf(total, mean, normalStdDev) * state.totals.length;
-      const x = padding + ((total - minTotal) / (maxTotal - minTotal)) * plotWidth;
+      const yCount = normalPdf(total, mean, normalStdDev) * curveCount;
+      const x = padding + ((total - minTotal + 0.5) / binCount) * plotWidth;
       const y = height - padding - (yCount / scaleCount) * (plotHeight - 34);
       if (total === minTotal) {
         ctx.moveTo(x, y);
@@ -498,6 +481,27 @@ function drawHistogram() {
       }
     }
     ctx.stroke();
+    ctx.restore();
+  }
+
+  if (state.totals.length === 0) {
+    const captionX = padding + 12;
+    const captionY = height / 2 - 42;
+    const captionWidth = 270;
+    const captionHeight = 78;
+    ctx.save();
+    ctx.fillStyle = getTheme() === "light" ? "rgba(248,250,252,0.92)" : "rgba(8,16,29,0.8)";
+    ctx.fillRect(captionX, captionY, captionWidth, captionHeight);
+    ctx.strokeStyle = palette.axes;
+    ctx.strokeRect(captionX, captionY, captionWidth, captionHeight);
+    ctx.fillStyle = palette.text;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.font = '700 24px "Trebuchet MS", sans-serif';
+    ctx.fillText("No totals yet", captionX + 18, captionY + 12);
+    ctx.fillStyle = palette.mutedText;
+    ctx.font = '400 15px "Trebuchet MS", sans-serif';
+    ctx.fillText("Use Run once etc", captionX + 18, captionY + 44);
     ctx.restore();
   }
 
@@ -529,12 +533,12 @@ function drawHistogram() {
   ctx.restore();
 
   renderDiceSdCaption();
-  histogramMeanValue.textContent = formatSd(histogramMean);
-  exactMeanValue.textContent = formatSd(mean);
-  normalMeanValue.textContent = formatSd(mean);
-  histogramStdValue.textContent = formatSd(histogramStdDev);
-  exactStdValue.textContent = formatSd(exactStdDev);
-  normalStdValue.textContent = formatSd(normalStdDev);
+  histogramMeanValue.textContent = state.totals.length > 0 ? formatSd(histogramMean) : "-";
+  exactMeanValue.textContent = faceStats ? formatSd(mean) : "-";
+  normalMeanValue.textContent = faceStats ? formatSd(mean) : "-";
+  histogramStdValue.textContent = state.totals.length > 0 ? formatSd(histogramStdDev) : "-";
+  exactStdValue.textContent = faceStats ? formatSd(exactStdDev) : "-";
+  normalStdValue.textContent = faceStats ? formatSd(normalStdDev) : "-";
   renderCltCaption();
 }
 
